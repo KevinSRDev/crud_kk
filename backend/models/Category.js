@@ -1,5 +1,7 @@
-/ ** Modelo de categoria MONGODB **/
-// Define la estructura de  la categoria
+/** 
+ * Modelo de categoria MONGODB 
+ * Define la estructura de  la categoria
+**/
 
 
 const mongoose = require('mongoose');
@@ -24,7 +26,7 @@ const categorySchema = new mongoose.Schema({
 
     // Active desactiva la categoria pero no la elimina
     active:{
-        type: String,
+        type: Boolean,
         default: true
     }
 },{
