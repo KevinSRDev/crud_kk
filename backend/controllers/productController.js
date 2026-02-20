@@ -16,7 +16,7 @@
  * Cuando una producto se elimina o las subcategorias relacionados se desactivan 
 */
 
-const Products = require('../models/Product');
+const Product = require('../models/Product');
 const Subcategory = require('../models/Subcategory');
 const Category = require('../models/Category');
 
@@ -25,264 +25,309 @@ const Category = require('../models/Category');
  * POST /api/products
  * Auth Bearer token requerido
  * Roles: admin y coordinador
- * body requerido:
+ * 
  * name nombre del producto
  * description: descripcion del producto
  * producto: id de la subcategoria padre a la que pertenece
  * retorna:
  * 201: producto creado en MongoDB
  * 400: validacion fallida o nombre duplicado
- * 404: subcategoria padre no existe
+ * 404: categoria padre no existe
  * 500: Error en base de datos
  */
 
 exports.createProduct = async (req, res) => {
     try {
-        const { name, description, stock } = req.body;
+        const { name, description, price, stock, category, subcategory } = req.body;
 
-        // Validar que la categoria padre exista
-        const parentCategory = await Category.findById(category);
-        if (!parentCategory) {
+        // Validar que la categoria padre exista PEDIENTE
+        // Verificar que todos los campos requeridos esten presentes
+        const categoryExist = await Category.findById(category);
+        if (!categoryExist) {
             return res.status(404).json({
                 success: false,
-                message: 'La categoria no existe'
+                message: 'La categoria solicitada no existe',
+                categoryId: category
+            });
+        }
+        // Validar que la subcategoria padre exista y pertenece a la categoria especificada
+        const subcategoryExist = await Subcategory.findById({
+                _id: subcategory,
+                category: category
+        });
+        if (!subcategoryExist) {
+            return res.status(404).json({
+                success: false,
+                message: 'La subcategoria no existe o no pertenece a la categoria especificada'
             });
         }
 
-        // Crear nueva subcategoria 
-        const newSubcategory = new Subcategory({
-            name: name.trim(),
-            description: description.trim(),
-            category: category
+        // Crear nuevo producto 
+        const product = new Products({
+            name,
+            description,
+            stock,
+            category,
+            subcategory
         });
 
-        await newSubcategory.save();
+       // Si hay usuario autenticado, registrado  quien creo el producto
+       if (req.user && req.user_id) {
+            product.createdBy = req.user_id;
+       }
 
-        res.status(201).json({
+       // Guardar el producto en la base de datos
+         const savedProduct = await product.save();
+
+        // Obtener producto poblado con datos relacionado (populate)
+        const productWithRelations = await Product.findById(savedProduct._id)
+            .populate('category', 'name')
+            .populate('subcategory', 'name')
+            .populate('createdBy', 'username email');
+
+        return res.status(201).json({
             success: true,
-            message: 'Subcategoria creada exitosamente',
-            data: newSubcategory
+            message: 'Producto creado exitosamente',
+            data: productWithRelations
         });
+
     } catch (error) {
-        console.error('Error en crear la subcategoria:', error);
-        // Manejo de errores de indice unico
-        if (error.message.includes('duplicate key') || error.message.includes('Ya existe')) {
+        console.error('Error en crear el producto:', error);
+
+        // Manejar error de duplicado (campo unico )
+        if (error.code === 11000) {
             return res.status(400).json({
                 success: false,
-                message: 'Ya existe una subcategoria con ese nombre'
+                message: 'Ya existe un productocon ese nombre'
             });
         }
 
-        // Error generico del servidor
         res.status(500).json({
             success: false,
-            message: 'Error al crear subcategoria',
-        });
-    }
-};
-
-/**
- * GET consultar listado de subcategorias
- * GET /api/sucategories
- * por defecto retorna solo las subcategorias activas
- * con includeInactive=true retorna todas las subcategorias incluyendo las inactivas
- * Ordena por desendente por fecha de creacion
- * retorna:
- * 200: lista de subcategorias
- * 500: error de base de datos
- */
-
-exports.getSubcategories = async (req, res) => {
-    try {
-        // Por defecto solo las subcategorias activas
-        // IncludeInactive=true permite ver desactivadas
-        const includeInactive = req.query.includeInactive === 'true';
-        const activeFilter = includeInactive ? {} : {
-            active: { $ne: false }
-        };
-
-        const subcategories = await Subategory.find(activeFilter).populate('category', 'name');
-        res.status(200).json({
-            success: true,
-            data: subcategories
-        });
-    } catch (error) {
-        console.error('Error al obtener subcategorias', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al obtener subcategorias'
-        })
-    }
-};
-
-/**
- * READ Obtener una subcategoria especifica por id
- * GET /api/subcategories/:id
- */
-
-exports.getSubcategoryById = async (req, res) => {
-    try {
-        // Por defecto solo las subcategorias activas
-        // IncludeInactive=true permite ver desactivadas
-        const subcategory = await Subcategory.findById(req.params.id).populate('category', 'name')
-        if (!subcategory) {
-            return res.status(404).json({
-                success: false,
-                message: 'Subcategoria no encontrada'
-            });
-        }
-        res.status(200).json({
-            success: true,
-            data: subcategory
-        });
-    } catch (error) {
-        console.error('Error en obtener subcategorias por id', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al obtener subcategoria por id',
-        })
-    }
-};
-
-/**
- * UPDATE Actualizar subcategoria existente
- * PUT /api/subcategories/:id
- * Auth Bearer token requerido
- * roles: admin y coordinador
- * body
- * name: Nuevo nombre de la subcategoria
- * description: nueva description
- * category nuevo id de la categoria
- * validaciones
- * si quiere cambia la categoria verifica que exista
- * si quiere solo actualiza el nombre o solo la descripcion o las dos
- * Retorna:
- * 200: subcategoria actualizada
- * 404: subcategoria no encontrada
- * 500: error de base de datos
- */
-exports.updateSubcategory = async (req, res) => {
-    try {
-        const { name, description, category } = req.body;
-
-        // Verificar si cambia la categoria padre
-        if (category) {
-            const parentCategory = await Category.findById(Category);
-            if (!parentCategory) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'La categoria no existe'
-                });
-            }
-        }
-
-        // Construir objeto de actualizacion solo en campos enviados
-        const updateSubcategory = await Subcategory.findByIdAndUpdate(
-            req.params.id,
-            updateData,
-            {
-                name: name ? name.trim() : undefined,
-                description: description ? description.trim() : undefined,
-                category
-            },
-            { new: true, runValidators: true }
-        );
-
-        if (!updateSubcategory) {
-            return res.status(404).json({
-                success: false,
-                message: 'Subcategoria no encontrada'
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: 'Subcategoria actualizada exitosamente',
-            data: updateSubcategory
-        });
-    } catch (error) {
-        console.error('Error en actualizar subcategoria', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al actualizar la subcategoria',
+            message: 'Error al crear el producto',
             error: error.message
         });
     }
 };
 
 /**
- * Delete eliminar o desactivar una subcategoria
- * DELETE /api/subcategories/:id
- * Auth Bearer token requerido
- * roles: admin
- * query param:
- * hardDelete=true elimina permanentemente de la base de datos
- * Default: Soft delete (solo desactivar)
- * SOFT Delete: marca la subcategoria como inactiva 
- * Desactiva en cascada todos los productos relacionados
- * Al activar retorna todos los datos incluyendo los inactivos
+ * READ: Obtener productos (con filtro de activos/inactivos)
  * 
- * HARD Delete: elimina permanetemente la subcategoria de la base de datos
- * elimina en cascada la subcategoria y productos relacionados
- * No su puede recuperar
+ * GET /api/products
+ * Query params:
+ *  -includeInactive=true: Mostrar tambien productos inactivos (desactivados)
+ *  -Default: Solo productos activos (active: true)
  * 
- * Retorna:
- * 200: Subcategoria eliminada o desactivada
- * 404: Subcategoria no encontrada
- * 500: Error de base de datos
+ * Retorna: Array de productos poblados con categoria y subcategoria
  */
 
-exports.deleteSubcategory = async (req, res) => {
+exports.getProducts = async (req, res) => {
     try {
-        const Product = require('../models/Product');
-        const isHardDelete = req.query.hardDelete === 'true';
+        // Determinar si incluir productos inactivos
+        const includeInactive = req.query.includeInactive === 'true';
+        const activeFilter = includeInactive ? {} : { active: { $ne: false } };
 
-        // Buscar la categoria a eliminar
-        const subcategory = await Subcategory.findById(req.params.id);
-        if (!subcategory) {
-            return res.status(404).json({
-                success: false,
-                message: 'Subcategoria no encontrada'
+        // Obtener productos con datos relacionados
+        const products = await Product.find(activeFilter)
+            .populate('category', 'name')
+            .populate('subcategory', 'name')
+            .sort({ createdAt: -1 });
+        
+        // SI el usuario es auxiliar, no mostrar informacion de quien lo creo
+        if (req.user && req.user.role === 'auxiliar') {
+            // Ocultar campos de createdBy para usuarios auxiliares
+            products.forEach(product => {
+                product.createdBy = undefined;
             });
         }
+
+        res.status(200).json({
+            success: true,
+            count: products.length,
+            data: products
+        });
+
+    } catch (error) {
+        console.error('Error en getProducts', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener productos',
+            error: error.message
+        })
+    }
+};
+
+/**
+ * READ:  Obtener un producto especifico por id
+ * GET /api/products/:id
+ * Retorna: Producto poblado con categoria y subcategoria
+ */
+
+exports.getProductById = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id)
+            .populate('category', 'name description')
+            .populate('subcategory', 'name description');
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: 'Producto no encontrado'
+            });
+        }
+
+        // Ocultar createdBy para usuarios auxiliares
+        if (req.user && req.user.role === 'auxiliar') {
+            product.createdBy = undefined;
+        }
+
+        res.status(200).json({
+            success: true,
+            data: product
+        });
+
+    } catch (error) {
+        console.error('Error en getProductById: ', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener producto por id',
+            error: error.message
+        })
+    }
+};
+
+/**
+ * UPDATE Actualizar un producto
+ * 
+ * PUT /api/products/:id
+ * Body: { cualquier campo a actualizar }
+ * 
+ * - Solo actualiza campos enviados
+ * - Valida relaciones si se evian category o subcategory
+ * - Retorna el producto actualizado
+ */
+exports.updateProduct = async (req, res) => {
+    try {
+        const { name, description, price, stock, category, subcategory } = req.body;
+        const updateData = {};
+
+        // Agregar solo los campos que fueron enviados
+        if (name) updateData.name = name;
+        if (description) updateData.description = description;
+        if (price) updateData.price = price;
+        if (stock) updateData.stock = stock;
+        if (category) updateData.category = category;
+        if (subcategory) updateData.subcategory = subcategory;
+
+        // Validar relaciones si se actualizan
+        if (category || subcategory) {
+            if (category) {
+                const categoryExist = await Category.findById(category);
+                if (!categoryExist) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'La categoria solicitada no existe'
+                    });
+                }
+            }
+            if (subcategory) {
+                const subcategoryExist = await Subcategory.findOne({
+                    _id: subcategory,
+                    category: category || updateData.category
+                });
+                if (!subcategoryExist) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'La subcategoria no existe o no pertenece a la categoria especificada'
+                    });
+                }
+            }
+
+        }
+
+        // Actualizar producto en DB
+        const updateProduct = await Product.findByIdAndUpdate(req.params.id, updateData, {
+            new: true,
+            runValidators: true
+        }).populate('category', 'name')
+          .populate('subcategory', 'name')
+          .populate('createdBy', 'username email');
+
+        if (!updateProduct) {
+            return res.status(404).json({
+                success: false,
+                message: 'Producto no encontrado'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Producto actualizado exitosamente',
+            data: updateProduct
+        });
+        
+    } catch (error) {
+        console.error('Error en updateProduct: ', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al actualizar el producto',
+            error: error.message
+        });
+    }
+};
+
+/**
+ * DELETE:  eliminar o desactivar un producto
+ * DELETE /api/products/:id
+ * 
+ * Query params:
+ * - hardDelete=true: Elimina permanentemente el producto de la DB
+ * - Default: Soft delete, (marcar como inactivo)
+ * 
+ * SOFT DELETE: Solo marca active: false
+ * HARD DELETE: elimina permanetemente el documento
+ */
+
+exports.deleteProduct = async (req, res) => {
+    try {
+        const isHardDelete = req.query.hardDelete === 'true';
+        const product = await Product.findById(req.params.id);        
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: 'Producto no encontrado'
+            });
+        }
+
         if (isHardDelete) {
-            // Eliminar en cascada subcategorias y productos relacionados
-            // Paso 1 obtener IDs de todas los productos relacionados
-            await Product.deleteMany({ subcategory: req.params.id });
-            // Paso 2 eliminar la subcategoria
-            await Subcategory.findByIdAndDelete(req.params.id);
+            // ==== HARD DELETE: eliminar permanentemente de la DB =====
+            await Product.findByIdAndDelete(req.params.id);
 
             res.status(200).json({
                 success: true,
-                message: 'Subcategoria eliminada permanentemente y sus productos relacionados',
+                message: 'Producto eliminado permanentemente de la DB',
                 data: {
                     subcategory: subcategory
                 }
             });
         } else {
-            // Soft delete solo marcar como inactivo con cascada
-            subcategory.active = false;
-            await subcategory.save();
+            // ==== SOFT DELETE: Solo marcar con inactivo ====
+            product.active = false;
+            await product.save();
 
-            // Desactivar todas las subcategorias relacionadas 
-            const products = await Product.updateMany(
-                { subcategory: req.params.id },
-                { active: false }
-            );
-            return res.status(200).json({
+            res.status(200).json({
                 success: true,
-                message: 'Subcategoria desactivada exitosamente y sus productos asociados',
-                data: {
-                    subcategory: subcategory,
-                    productsDeactived: products.modifiedCount
-                }
+                message: 'Producto desactivado exitosamente (soft delete)',
+                data: product
             });
         }
+        
     } catch (error) {
-        console.error('Error al desactivar la subcategoria:', error);
-        res.status(500), json({
+        console.error('Error en deleteProduct: ', error);
+        res.status(500).json({
             success: false,
-            message: 'Error al desactivar la subcategoria',
+            message: 'Error al eliminar el producto',
             error: error.message
         });
     }
