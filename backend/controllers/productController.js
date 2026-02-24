@@ -72,12 +72,12 @@ exports.createProduct = async (req, res) => {
         });
 
        // Si hay usuario autenticado, registrado  quien creo el producto
-       if (req.user && req.user_id) {
+        if (req.user && req.user_id) {
             product.createdBy = req.user_id;
-       }
+        }
 
        // Guardar el producto en la base de datos
-         const savedProduct = await product.save();
+        const savedProduct = await product.save();
 
         // Obtener producto poblado con datos relacionado (populate)
         const productWithRelations = await Product.findById(savedProduct._id)
@@ -291,8 +291,8 @@ exports.updateProduct = async (req, res) => {
 exports.deleteProduct = async (req, res) => {
     try {
         const isHardDelete = req.query.hardDelete === 'true';
-        const product = await Product.findById(req.params.id);        
-
+        const product = await Product.findById(req.params.id);
+        
         if (!product) {
             return res.status(404).json({
                 success: false,
