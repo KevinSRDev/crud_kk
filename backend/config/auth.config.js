@@ -3,7 +3,7 @@ require('dotenv').config();
 
 module.exports = {
   // Clave para firmar los tokens jwt
-  secret: process.env.JWT_SECRET || "tuclavesecretaparatoken",
+  secret: process.env.JWT_SECRET || "tu_clave_secreta_para_token",
   // Tiempo de expiración del token en segundos
   jwtExpiration: process.env.JWT_EXPIRATION || 86400, // 24 horas 
   // Tiempo de expiración del token para refrescar 
