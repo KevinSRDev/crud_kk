@@ -69,7 +69,7 @@ const chedkDuplicateUsernameOrEmail = async (req, res, next) => {
         success: false,
         message: "Error al verificar credenciales",
         error: err.message
-      });
+    });
     }
 };
 /**
