@@ -57,7 +57,7 @@ exports.signup = async (req, res) => {
             token: token,
             user: UserResponse
         });
-    } catch (err) {
+    } catch (error) {
         return res.status(500).json({
             success: false,
             message: 'Error al registrar usuario',

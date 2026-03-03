@@ -39,7 +39,7 @@ const User = require('../models/User');
  * next() si la validación pasa
  */
 
-const chedkDuplicateUsernameOrEmail = async (req, res, next) => {
+const checkDuplicateUsernameOrEmail = async (req, res, next) => {
     try{
         // Validar que ambos campos estan presentes
         if (!req.body.username || !req.body.email) {
@@ -120,6 +120,6 @@ const checkRolesExisted = (req, res, next) => {
  * router.post('/signup...)
  */
 module.exports = {
-    chedkDuplicateUsernameOrEmail,
+    checkDuplicateUsernameOrEmail,
     checkRolesExisted
 };
