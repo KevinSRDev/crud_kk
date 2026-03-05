@@ -4,7 +4,7 @@
  * el producto depende de una subcategoria depende de una categoria
  * muchos productos pueden pertenecer a una subcategoria
  * Tiene relacion un user para ver quein creo el producto
- * Soporte de imagenes (array de url)
+ * Soporte de imagenes (array de url) se guarda en una carperta no en la Base de datos
  * Validadcion de valores numericos (no negativos)
 **/
 
@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema({
     name:{
         type: String,
         required: [true, 'El nombre es obligatorio'],
-        unique: true, // No pieden haber dos productos con el mismo nombre
+        unique: true, // No pueden haber dos productos con el mismo nombre
         trim: true // Eliminar espacios al inicio y al final
     },
 
@@ -50,7 +50,7 @@ const productSchema = new mongoose.Schema({
     // Un producto pertenece a una categoria pero una subcategoria puede tener muchos productos relacion 1 a muchos
 
     category:{
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId, // Consultar en otra coleccion
         ref: 'Category', // puede ser poblado con .populate('category')
         required: [true, 'La categoria es requerida']
     },
@@ -63,15 +63,14 @@ const productSchema = new mongoose.Schema({
 
     // Quien creo el producto
     // Referencia de User no requerido
-    createddB: {
+    createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User' // puede ser poblado para mostrar los usuarios
     },
 
     // Array de urls de imagenes de productos
     images: [{
-        type: Boolean,
-        default: true
+        type: String, // url de la imagen
     }],
 
     // Active desactiva el producto pero no la elimina

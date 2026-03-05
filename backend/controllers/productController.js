@@ -1,14 +1,3 @@
-/**
- * NOTAS!!! ⚠⚠⚠⚠☣⚠⚠☣⚠⚠⚠⚠
- * 3 modelos de relacion principal
- * Se necesitan llamar
- * name, description, stock y dos relaciones verificables en models
- * para crear hay que verificar si hay categoria y subcategoria, hacer proceso
- * los productos estan relacionados con username o email para registro de quien lo crea
- * consulta con id tener en cuenta la categoria y subcategoria
- * todo lo puede editar en stock {admin}
- */
-
 /** 
  * Controlador de productos 
  * maneja todas las operaciones (CRUD) relacionadas con productos
@@ -40,8 +29,15 @@ exports.createProduct = async (req, res) => {
     try {
         const { name, description, price, stock, category, subcategory } = req.body;
 
-        // Validar que la categoria padre exista PEDIENTE
         // Verificar que todos los campos requeridos esten presentes
+        if (!name || !description || !price || !stock || !category || !subcategory) {
+            return res.status(400).json({
+                success: false,
+                message: 'Todos los campos son obligatorios',
+                requiredFields: ['name', 'description', 'price', 'stock', 'category', 'subcategory']
+            });
+        }
+        // Validar que la categoria padre exista PEDIENTE
         const categoryExist = await Category.findById(category);
         if (!categoryExist) {
             return res.status(404).json({
@@ -63,9 +59,10 @@ exports.createProduct = async (req, res) => {
         }
 
         // Crear nuevo producto 
-        const product = new Products({
+        const product = new Product({
             name,
             description,
+            price,
             stock,
             category,
             subcategory
@@ -88,7 +85,7 @@ exports.createProduct = async (req, res) => {
         return res.status(201).json({
             success: true,
             message: 'Producto creado exitosamente',
-            data: productWithRelations
+            data: productWithRelations // En consola muestra la informacion del producto creado
         });
 
     } catch (error) {
@@ -133,7 +130,7 @@ exports.getProducts = async (req, res) => {
             .populate('subcategory', 'name')
             .sort({ createdAt: -1 });
         
-        // SI el usuario es auxiliar, no mostrar informacion de quien lo creo
+        // Si el usuario es auxiliar, no mostrar informacion de quien lo creo
         if (req.user && req.user.role === 'auxiliar') {
             // Ocultar campos de createdBy para usuarios auxiliares
             products.forEach(product => {
@@ -250,8 +247,8 @@ exports.updateProduct = async (req, res) => {
             new: true,
             runValidators: true
         }).populate('category', 'name')
-          .populate('subcategory', 'name')
-          .populate('createdBy', 'username email');
+            .populate('subcategory', 'name')
+            .populate('createdBy', 'username email');
 
         if (!updateProduct) {
             return res.status(404).json({
@@ -308,7 +305,7 @@ exports.deleteProduct = async (req, res) => {
                 success: true,
                 message: 'Producto eliminado permanentemente de la DB',
                 data: {
-                    subcategory: subcategory
+                    data: product
                 }
             });
         } else {
