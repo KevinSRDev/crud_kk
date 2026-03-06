@@ -10,7 +10,7 @@ const bcrypt = require('bcryptjs'); // Libreria para encriptar contraseña
 //Estrucutura de la base de datos para los usuarios
 const userSchema = new mongoose.Schema({
   // El nombre de usuario debe ser único en toda la base de datos
-  userName:{
+  username:{
     type: String,
     required: true,
     unique: true,

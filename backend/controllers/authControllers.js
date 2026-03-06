@@ -4,7 +4,7 @@
  */
 
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('../config/auth.config');
 
@@ -22,7 +22,7 @@ exports.signup = async (req, res) => {
     try {
         // Crear nuevo usuario
         const user = new User({
-            userName: req.body.userName,
+            username: req.body.username,
             email: req.body.email,
             password: req.body.password,
             role: req.body.role || 'auxiliar' // Por defecto el rol es auxiliar
@@ -46,7 +46,7 @@ exports.signup = async (req, res) => {
         // Preparando respuesta sin mostrar la contraseña
         const UserResponse = {
             id: saveUser._id,
-            userName: saveUser.userName,
+            username: saveUser.username,
             email: saveUser.email,
             role: saveUser.role,
         };
@@ -79,7 +79,7 @@ exports.signup = async (req, res) => {
 exports.signin = async (req, res) => {
     try {
         // Validar que se envie el email o username
-        if (!req.body.email && !req.body.userName) {
+        if (!req.body.email && !req.body.username) {
             return res.status(400).json({
                 success: false,
                 message: 'email o username requerido'
@@ -97,9 +97,9 @@ exports.signin = async (req, res) => {
         // Buscar usuario por email o username
         const user = await User.findOne({
             $or: [
-                { userName: req.body.userName },
+                { username: req.body.username },
                 { email: req.body.email }
-            ]
+            ] // $or guarda datos directamente en una array
         }).select('+password'); // include password field
 
         // si no existe el usuario con este email o username
@@ -142,7 +142,7 @@ exports.signin = async (req, res) => {
         // Prepara respuesta sin mostrar la contraseña
         const UserResponse = {
             id: user._id,
-            userName: user.userName,
+            username: user.username,
             email: user.email,
             role: user.role
         };

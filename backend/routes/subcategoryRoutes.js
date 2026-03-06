@@ -39,8 +39,14 @@ router.post('/',
     subcategoryController.createSubcategory
 );
 
-router.get('/', subcategoryController.getSubcategories);
-router.get('/:id', subcategoryController.getSubcategoryById);
+router.get('/', 
+    verifyToken,
+    subcategoryController.getSubcategories
+);
+router.get('/:id', 
+    verifyToken,
+    subcategoryController.getSubcategoryById
+);
 
 router.put('/:id',
     verifyToken,

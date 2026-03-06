@@ -45,7 +45,7 @@ const checkRole = (...allowedRoles) => {
         if (!allowedRoles.includes(req.userRole)) {
             return res.status(403).json({
                 success: false,
-                message: `'Permisos insuficientes Se requiere: ${allowedRoles.join('o')}`
+                message: `'Permisos insuficientes Se requiere: ${allowedRoles.join( 'o ')}`
             });
         }
         // Usuario tiene permiso continuar

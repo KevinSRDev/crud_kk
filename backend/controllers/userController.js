@@ -19,7 +19,7 @@
  */
 
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 /**
  * Obtener lista de usuarios 
@@ -74,7 +74,7 @@ exports.getAllUsers = async (req, res) => {
 exports.getUserById = async (req, res) => {
     try {
         // Por defecto solo mostrar usuarios activos
-        const user = await user.findById(req.params.id).select('-password');
+        const user = await User.findById(req.params.id).select('-password');
 
         if (!user) {
             return res.status(404).json({
@@ -106,7 +106,7 @@ exports.getUserById = async (req, res) => {
         });
 
     } catch (error) { 
-        console.error('Error en getUserById:', error.message);
+        console.error('Error en getUserById:', error);
         res.status(500).json({
             success: false,
             message: 'Error al encontrar al ususario especificado',
@@ -128,11 +128,11 @@ exports.getUserById = async (req, res) => {
 
 exports.createUser = async (req, res) => {
     try {
-        const { userName, email, password, role } = req.body;
+        const { username, email, password, role } = req.body;
         
         // Crear suario nuevo
         const user = new User({
-            userName,
+            username,
             email,
             password,
             role
@@ -146,7 +146,7 @@ exports.createUser = async (req, res) => {
             message: 'Usuario creado',
             user: {
                 id: savedUser._id,
-                userName: savedUser.userName,
+                username: savedUser.username,
                 email: savedUser.email,
                 role: savedUser.role
             }

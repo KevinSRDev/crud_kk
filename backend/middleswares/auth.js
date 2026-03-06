@@ -14,7 +14,7 @@ const User = require('../models/User');
  * si no es valido o no existe retorna 401 Unauthorized
  */
 
-exports.authenticate = async (req, resizeBy, next) => {
+exports.authenticate = async (req, res, next) => {
     try {
         // Exraer el token del header Bearer <token>
         const token = req.header('Authorization')?.replace('Bearer ', '');

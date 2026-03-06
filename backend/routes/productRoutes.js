@@ -16,7 +16,7 @@ const productController = require('../controllers/productController');
 const { check } = require('express-validator');
 const { verifyToken } = require('../middleswares/authJwt');
 const { checkRole } = require('../middleswares/role');
-
+    
 const validateProduct = [
     check('name')
         .not().isEmpty()
@@ -51,8 +51,14 @@ router.post('/',
     productController.createProduct
 );
 
-router.get('/', productController.getProducts);
-router.get('/:id', productController.getProductById);
+router.get('/', 
+    verifyToken,
+    productController.getProducts
+);
+router.get('/:id', 
+    verifyToken,
+    productController.getProductById
+);
 
 router.put('/:id',
     verifyToken,

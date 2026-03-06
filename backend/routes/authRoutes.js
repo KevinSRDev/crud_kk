@@ -8,7 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authControllers');
-const { verifySingUp } = require('../middleswares');
+const { verifySignup } = require('../middleswares');
 const { verifyToken } = require('../middleswares/authJwt');
 const { checkRole } = require('../middleswares/role');
 
@@ -20,8 +20,8 @@ router.post('signin', authController.signin);
 router.post('/sigup',
     verifyToken,
     checkRole('admin'),
-    verifySingUp.checkDuplicateUsernameOrEmail,
-    verifySingUp.checkRolesExisted,
+    verifySignup.checkDuplicateUsernameOrEmail,
+    verifySignup.checkRolesExisted,
     authController.signup
 )
 

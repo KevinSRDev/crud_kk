@@ -5,11 +5,11 @@
  * configura Express, cors, conecta MongoDB, define rutas y conecta con el frontend
  */
 
-require('dotenv').config();
+require('dotenv').config(); // Se encarga de las var de entorno, el primero que se llama
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-const morgan = require('morgan');
+const cors = require('cors'); // Permite conectar directamente con el front-end
+const morgan = require('morgan'); // Monitorea desde consola
 const config = require('./config');
 
 /**
@@ -17,7 +17,7 @@ const config = require('./config');
  * verifica que las variables de entorno requeridas esten definidas
  */
 
-if (!process.env.MONGO_URI) {
+if (!process.env.MONGODB_URI) {
     console.error('Error: MONGO_URI no esta definida en .env');
     process.exit(1);
 }
@@ -39,11 +39,15 @@ if (!process.env.JWT_SECTET) {
 
     // Cors permite las solicitudes desde el frontend
     app.use(cors({
-        origin:'http://localhost:27017'
+        origin: 'http://localhost:3001',
+        credentials: true,
     }));
 
     //Morgan registra todas las solicitudes
     app.use(morgan('dev'));
+
+    // Express JSON parsea bodies en formato JSON
+    app.use(express.json());
 
     // Express JSON parsea bodies en formato  JSON
     app.use(express.urlencoded({ extended: true }));
@@ -51,27 +55,29 @@ if (!process.env.JWT_SECTET) {
     // Conexion a mongoDB
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('MongoDB conectado correctamente'))
-    .catch(err => {
-        console.error('Error de conexion a mongoDB:', err.message);
+    .catch((error) => {
+        console.error('Error de conexion a mongoDB:', error);
         process.exit(1);
     });
 
 // Registra rutas
 
 // Rutas de autenticaion (login, registrer)
+app.use('api/authRoutes', authRoutes);
+
 app.use('api/users', userRoutes);
 
 // Rutas de productos CRUD
-app.user('api/products', productRoutes);
+app.use('api/products', productRoutes);
 
 // Rutas de categorias
-app.user('api/categories', categoryRoutes);
+app.use('api/categories', categoryRoutes);
 
 // Rutas de subcategorias
-app.user('api/subcategories', subcategoryRoutes);
+app.use('api/subcategories', subcategoryRoutes);
 
 // Rutas de estadisticas
-app.user('api/statistics', statisticsRoutes);
+app.use('api/statistics', statisticsRoutes);
 
 // Manejo de errores globales
 app.use((req, res) => {

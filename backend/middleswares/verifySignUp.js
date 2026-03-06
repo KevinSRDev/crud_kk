@@ -40,7 +40,7 @@ const User = require('../models/User');
  */
 
 const checkDuplicateUsernameOrEmail = async (req, res, next) => {
-    try{
+    try {
         // Validar que ambos campos estan presentes
         if (!req.body.username || !req.body.email) {
             return res.status(400).json({
@@ -49,11 +49,11 @@ const checkDuplicateUsernameOrEmail = async (req, res, next) => {
         }
         // Buscar usuario existente con igual username o email
         const user = await User.findOne({
-            $or:[
-                { username: req.body.username},
-                { email: req.body.email}
+            $or: [
+                { username: req.body.username },
+                { email: req.body.email }
             ]
-        }) .exec();
+        }).exec(); // .exec ejecuta el req y retorna los datos
         // Si encuentra un suario retornar error
         if (user) {
             return res.status(400).json({
@@ -66,10 +66,10 @@ const checkDuplicateUsernameOrEmail = async (req, res, next) => {
     } catch (err) {
         console.error("[verifiSignUp] Error en checkDuplicateUsernameOrEmail:", err);
         return res.status(500).json({
-        success: false,
-        message: "Error al verificar credenciales",
-        error: err.message
-    });
+            success: false,
+            message: "Error al verificar credenciales",
+            error: err.message
+        });
     }
 };
 /**
@@ -96,9 +96,9 @@ const checkRolesExisted = (req, res, next) => {
 
     // Si roles está presente en el request
     if (req.body.role) {
-        // Convertir a array si es string (soporta ambos formatos)
-        const roles = Array.isArray(req.body.role) ? req.body.role: [req.body.role];
-        
+        // Guardar los roles  en un array, soporta un solo rol o multiples en el caso que un usuario tenga varios roles asignados
+        const roles = Array.isArray(req.body.role) ? req.body.role : [req.body.role];
+
         // Filtrar roles que no están en la lista valida 
         const invalidRoles = roles.filter(role => !validRoles.includes(role));
 

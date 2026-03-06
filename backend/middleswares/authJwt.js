@@ -95,10 +95,10 @@ const verifyTokenFn = (req, res, next) => {
  * si algo sale mal en su definicion lanzara un error en tiempo de carga del modulo
 */
 if (typeof verifyTokenFn !== 'function') {
-    console.error('Error: verifyTokenFn no es una funcion valida');
+    console.error('[AuthJWT] ERROR: verifyTokenFn no es una funcion valida');
     throw new Error('verifyTokenFn debe ser una funcion');
 }
 // Exportar el middleware
 module.exports = {
-    verifyTokenFn: verifyTokenFn,
+    verifyToken: verifyTokenFn,
 };
