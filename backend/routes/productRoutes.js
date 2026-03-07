@@ -19,28 +19,34 @@ const { checkRole } = require('../middleswares/role');
     
 const validateProduct = [
     check('name')
-        .not().isEmpty()
-        .withmessage('El nombre es obligatorio'),
+        .not()
+        .isEmpty()
+        .withMessage('El nombre es obligatorio'),
     
     check('description')
-        .not().isEmpty()
-        .withmessage('La descripcion es obligatoria'),
+        .not()
+        .isEmpty()
+        .withMessage('La descripcion es obligatoria'),
     
     check('price')
-        .not().isEmpty()
-        .withmessage('El precio es obligatorio'),
+        .not()
+        .isEmpty()
+        .withMessage('El precio es obligatorio'),
 
     check('stock')
-        .not().isEmpty()
-        .withmessage('El stock es obligatorio'),
+        .not()
+        .isEmpty()
+        .withMessage('El stock es obligatorio'),
 
     check('subcategory')
-        .not().isEmpty()
-        .withmessage('La subcategoria es obligatoria'),
+        .not()
+        .isEmpty()
+        .withMessage('La subcategoria es obligatoria'),
 
     check('category')
-        .not().isEmpty()
-        .withmessage('La categoria es obligatoria'),
+        .not()
+        .isEmpty()
+        .withMessage('La categoria es obligatoria'),
 ]
 // Rutas CRUD
 

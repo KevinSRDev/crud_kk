@@ -22,7 +22,7 @@ if (!process.env.MONGODB_URI) {
     process.exit(1);
 }
 
-if (!process.env.JWT_SECTET) {
+if (!process.env.JWT_SECRET) {
     console.error('Error: JWT_SECRET no esta definida en .env');
     process.exit(1);
 }
@@ -53,7 +53,7 @@ if (!process.env.JWT_SECTET) {
     app.use(express.urlencoded({ extended: true }));
 
     // Conexion a mongoDB
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('MongoDB conectado correctamente'))
     .catch((error) => {
         console.error('Error de conexion a mongoDB:', error);
