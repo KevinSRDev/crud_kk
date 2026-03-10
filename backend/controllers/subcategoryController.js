@@ -90,7 +90,7 @@ exports.getSubcategories = async (req, res) => {
             active: { $ne: false }
         };
 
-        const subcategories = await Subategory.find(activeFilter).populate('category', 'name');
+        const subcategories = await Subcategory.find(activeFilter).populate('category', 'name');
         res.status(200).json({
             success: true,
             data: subcategories
@@ -166,6 +166,11 @@ exports.updateSubcategory = async (req, res) => {
         }
 
         // Construir objeto de actualizacion solo en campos enviados
+        const updateData = {};
+        if (name) updateData.name = name.trim();
+        if (description) updateData.description = description.trim();
+        if (category) updateData.category = category;
+
         const updateSubcategory = await Subcategory.findByIdAndUpdate(
             req.params.id,
             updateData,

@@ -63,21 +63,21 @@ mongoose.connect(process.env.MONGODB_URI)
 // Registra rutas
 
 // Rutas de autenticaion (login, registrer)
-app.use('api/authRoutes', authRoutes);
+app.use('/api/authRoutes', authRoutes);
 
-app.use('api/users', userRoutes);
+app.use('/api/users', userRoutes);
 
 // Rutas de productos CRUD
-app.use('api/products', productRoutes);
+app.use('/api/products', productRoutes);
 
 // Rutas de categorias
-app.use('api/categories', categoryRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // Rutas de subcategorias
-app.use('api/subcategories', subcategoryRoutes);
+app.use('/api/subcategories', subcategoryRoutes);
 
 // Rutas de estadisticas
-app.use('api/statistics', statisticsRoutes);
+app.use('/api/statistics', statisticsRoutes);
 
 // Manejo de errores globales
 app.use((req, res) => {

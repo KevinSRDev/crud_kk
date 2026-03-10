@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 
 // bcrypt → librería para encriptar contraseñas; no se usa directamente aquí porque
 // el modelo User tiene un pre-save hook que encripta automáticamente
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt.js');
 
 // Modelo User → se usa para verificar existencia y crear nuevos usuarios
 // Archivo: backend/models/User.js

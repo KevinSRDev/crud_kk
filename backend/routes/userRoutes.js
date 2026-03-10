@@ -31,19 +31,19 @@ router.use((req, res, next) => {
 
 router.post('/',
     verifyToken,
-    checkRole(['admin', 'coordinador']),
+    checkRole('admin', 'coordinador'),
     userController.createUser
 );
 
 router.get('/',
     verifyToken,
-    checkRole(['admin', 'coordinador', 'auxiliar']),
+    checkRole('admin', 'coordinador', 'auxiliar'),
     userController.getAllUsers
 );
 
 router.get('/:id',
     verifyToken,
-    checkRole(['admin', 'coordinador', 'auxiliar']),
+    checkRole('admin', 'coordinador', 'auxiliar'),
     userController.getUserById
 );
 
