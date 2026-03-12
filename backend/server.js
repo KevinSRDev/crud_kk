@@ -63,7 +63,7 @@ mongoose.connect(process.env.MONGODB_URI)
 // Registra rutas
 
 // Rutas de autenticaion (login, registrer)
-app.use('/api/authRoutes', authRoutes);
+app.use('/api/auth', authRoutes);
 
 app.use('/api/users', userRoutes);
 

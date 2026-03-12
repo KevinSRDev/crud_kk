@@ -57,7 +57,7 @@ async function runTests() { // Función principal que ejecuta todos los tests en
   console.log('─────────────────────────────');
 
   // Login - Admin
-  let res = await request('POST', '/authRoutes/signin', { // Envía petición de login con credenciales de admin
+  let res = await request('POST', '/auth/signin', { // Envía petición de login con credenciales de admin
     username: 'admin',      // Usuario admin creado con seedUsers.js
     password: 'admin12345'    // Contraseña del admin
   });
@@ -68,7 +68,7 @@ async function runTests() { // Función principal que ejecuta todos los tests en
   }
 
   // Login fallido
-  res = await request('POST', '/authRoutes/signin', { // Envía petición de login con contraseña incorrecta
+  res = await request('POST', '/auth/signin', { // Envía petición de login con contraseña incorrecta
     username: 'admin',
     password: 'wrongpassword'  // Contraseña incorrecta para probar que el API la rechaza
   });
