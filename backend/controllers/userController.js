@@ -193,6 +193,17 @@ exports.updateUser = async (req, res) => {
             });
         }
 
+        // Validar formato de email si se esta actualizando
+        if (req.body.email !== undefined) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(req.body.email)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'El correo electronico no tiene formato valido'
+                });
+            }
+        }
+
         // Actualizar usuario
         const updatedUser = await User.findByIdAndUpdate(
             req.params.id,
