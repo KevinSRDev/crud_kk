@@ -1,12 +1,13 @@
 // Script para insertar usuarios de ejemplo en la base de datos MongoDB
 // Ejecutar con: node seedUsers.js (desde la carpeta backend)
+require('dotenv').config();
 
 // mongoose → librería ODM para conectar Node.js con MongoDB
 const mongoose = require('mongoose');
 
 // bcrypt → librería para encriptar contraseñas; no se usa directamente aquí porque
 // el modelo User tiene un pre-save hook que encripta automáticamente
-const bcrypt = require('bcrypt.js');
+const bcrypt = require('bcryptjs');
 
 // Modelo User → se usa para verificar existencia y crear nuevos usuarios
 // Archivo: backend/models/User.js

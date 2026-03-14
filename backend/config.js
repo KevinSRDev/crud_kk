@@ -13,9 +13,9 @@ module.exports = {
     TOKEN_EXPIRATION: process.env.JWT_EXPIRATION || '24h',
 
     // configuracion de DB
-    DB_URI: process.env.MONGO_URI || 'mongodb://localhost:27017/crud-mongo',
+    DB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/crud-mongo',
     DB: {
-        URL: process.env.MONGO_URI || 'mongodb://localhost:27017/crud-mongo',
+        URL: process.env.MONGODB_URI || 'mongodb://localhost:27017/crud-mongo',
         OPTIONS: {
             useNewUrlParser: true,
             useUnifiedTopology: true

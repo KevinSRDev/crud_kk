@@ -1,5 +1,6 @@
 // Script para poblar categorías, subcategorías y productos con relaciones
 // Ejecutar con: node seedData.js (desde la carpeta backend)
+require('dotenv').config();
 
 // mongoose → librería ODM para conectar Node.js con MongoDB
 const mongoose = require('mongoose');
